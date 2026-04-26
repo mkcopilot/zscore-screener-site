@@ -1,7 +1,23 @@
 {
-  "scan_timestamp": "2026-04-26 15:37:46 EST",
-  "scan_date": "2026-04-26",
-  "universe_count": 0,
-  "signals_count": 0,
-  "results": []
+    "scan_time": "2026-04-26 21:38:17 EST",
+    "universe_count": 10,
+    "signal_count": 2,
+    "signals": [
+        {
+            "ticker": "GOOGL",
+            "price": 344.4,
+            "zscore": 1.18,
+            "rsi": 69.04,
+            "sma200": 276.28,
+            "timestamp": "2026-04-26T21:38:17.882930+00:00"
+        },
+        {
+            "ticker": "NVDA",
+            "price": 208.27,
+            "zscore": 1.53,
+            "rsi": 71.5,
+            "sma200": 182.83,
+            "timestamp": "2026-04-26T21:38:17.888822+00:00"
+        }
+    ]
 }
