@@ -7,27 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #05070a;
-            --card-bg: #0f172a;
-            --border-color: #1e293b;
-            --text-main: #94a3b8;
-            --text-bright: #f8fafc;
-        }
-
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            font-family: 'Inter', sans-serif;
-        }
-
-        .card { 
-            background: var(--card-bg); 
-            border: 1px solid var(--border-color); 
-            border-radius: 0.75rem;
-        }
-
-        /* Dark Table Styling */
+        /* Updated for Dark Mode */
+        body { background-color: #05070a; color: #94a3b8; font-family: 'Inter', sans-serif; }
+        .card { background: #0f172a; border: 1px solid #1e293b; border-radius: 0.75rem; }
+        
+        /* Dark Table Styles */
         table { width: 100%; border-collapse: collapse; }
         th { 
             background: #1e293b; 
@@ -36,39 +20,26 @@
             text-transform: uppercase; 
             letter-spacing: 0.05em; 
             padding: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            position: sticky; top: 0; z-index: 10;
         }
         td { 
             padding: 0.75rem 1rem; 
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-bright);
+            border-bottom: 1px solid #1e293b; 
+            color: #f8fafc;
             font-size: 0.875rem;
         }
         tr:hover { background-color: rgba(30, 41, 59, 0.5); }
-
-        /* Custom UI Elements */
-        input, select {
-            background: #1e293b !important;
-            border: 1px solid #334155 !important;
-            color: white !important;
-            border-radius: 0.375rem;
-            padding: 0.25rem 0.5rem;
+        
+        /* Input styling */
+        input, select { 
+            background: #1e293b !important; 
+            border: 1px solid #334155 !important; 
+            color: white !important; 
+            padding: 4px 8px; 
+            border-radius: 4px;
         }
-
-        .stat-card {
-            background: rgba(30, 41, 59, 0.3);
-            border-left: 3px solid #10b981;
-            padding: 1rem;
-        }
-
-        #loading {
-            background: var(--bg-color);
-            color: white;
-        }
-
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        .stat-card { border-left: 3px solid #10b981; padding-left: 1rem; }
+        #loading { background: #05070a; color: white; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -77,7 +48,7 @@
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6 border-b border-slate-800 pb-6">
             <div>
                 <h1 class="text-2xl font-bold text-white tracking-tight">Z-SCORE SCREENER</h1>
-                <p id="scan-time" class="text-[10px] mono text-slate-500 uppercase mt-1">Loading scan data...</p>
+                <p id="scan-time" class="text-[10px] font-mono text-slate-500 uppercase mt-1">Initializing scan...</p>
             </div>
             
             <div class="flex gap-4 flex-wrap">
@@ -99,20 +70,16 @@
                     <input type="number" id="z-min" value="-3" step="0.1" onchange="applyFilters()">
                 </div>
                 <div class="flex items-center gap-2">
-                    <label>Max Z-Score:</label>
-                    <input type="number" id="z-max" value="3" step="0.1" onchange="applyFilters()">
-                </div>
-                <div class="flex items-center gap-2">
                     <label>RS Rating > </label>
                     <input type="number" id="rs-min" value="0" onchange="applyFilters()">
                 </div>
-                <button onclick="resetFilters()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-1 rounded transition">Reset</button>
+                <button onclick="resetFilters()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-1 rounded">Reset</button>
             </div>
         </div>
 
         <div class="card overflow-hidden">
-            <div class="overflow-x-auto max-h-[700px]">
-                <table id="main-table">
+            <div class="overflow-x-auto max-h-[750px]">
+                <table>
                     <thead>
                         <tr>
                             <th>Ticker</th>
@@ -120,8 +87,8 @@
                             <th>Z-Score</th>
                             <th>RS Rating</th>
                             <th>Vol %</th>
-                            <th>Above 50MA</th>
-                            <th>Above 200MA</th>
+                            <th>50MA</th>
+                            <th>200MA</th>
                             <th>1y High</th>
                             <th>1y Low</th>
                             <th>Dist High %</th>
@@ -135,77 +102,75 @@
         </div>
     </div>
 
-    <div id="loading" class="fixed inset-0 flex items-center justify-center z-50 transition-opacity duration-300">
+    <div id="loading" class="fixed inset-0 flex items-center justify-center z-50">
         <div class="text-center">
             <div class="inline-block w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-sm font-mono uppercase tracking-widest">Initializing Screener...</p>
+            <p class="text-sm font-mono uppercase">Syncing Alpha Terminal...</p>
         </div>
     </div>
 
     <script>
-        // --- YOUR ORIGINAL DATA LOGIC (RETAINED & DARK THEME COMPATIBLE) ---
+        // --- YOUR ORIGINAL DATA LOGIC (AS SEEN IN EDITOR) ---
         let allData = [];
-        const fmt = (val) => val ? parseFloat(val).toFixed(2) : '-';
+        const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+        const fmt = val => val != null ? parseFloat(val).toFixed(2) : '-';
 
         function renderStats(json, sigs) {
             const meta = json.metadata || {};
-            document.getElementById('stat-gain').textContent = '+' + fmt(sigs.reduce((a, b) => a + (b.gain_pct || 0), 0) / sigs.length) + '%';
-            
+            document.getElementById('stat-gain').textContent = '+' + fmt(avg(sigs.map(r => r.gain_pct))) + '%';
             const best = sigs.reduce((a, b) => (a.gain_pct > b.gain_pct) ? a : b, sigs[0]);
-            document.getElementById('stat-best').textContent = best ? best.ticker : '--';
+            document.getElementById('stat-best').textContent = best ? best.ticker : '-';
             document.getElementById('scan-time').textContent = 'Scanned: ' + (meta.scan_timestamp || 'Unknown');
         }
 
         async function loadData() {
             try {
+                // Pointing to your existing data folder
                 const res = await fetch(`data/screener_results.json?t=${Date.now()}`);
+                if (!res.ok) throw new Error('Failed to load');
                 const json = await res.json();
                 allData = json.results || [];
-                applyFilters(json); // Passing json to render stats once
+                applyFilters(json);
             } catch (e) {
                 console.error(e);
-                document.getElementById('table-body').innerHTML = '<tr><td colspan="11" class="text-center py-10 text-red-400">Failed to load data.</td></tr>';
+                document.getElementById('table-body').innerHTML = `<tr><td colspan="11" class="text-center py-10 text-red-400">Error loading data.</td></tr>`;
             } finally {
-                const loader = document.getElementById('loading');
-                loader.style.opacity = '0';
-                setTimeout(() => loader.remove(), 300);
+                const overlay = document.getElementById('loading');
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 300);
             }
         }
 
-        function applyFilters(originalJson = null) {
+        function applyFilters(json = null) {
             const zMin = parseFloat(document.getElementById('z-min').value);
-            const zMax = parseFloat(document.getElementById('z-max').value);
             const rsMin = parseFloat(document.getElementById('rs-min').value);
-
+            
             const filtered = allData.filter(d => 
-                d.z_score >= zMin && 
-                d.z_score <= zMax && 
-                (d.rs_rating || 0) >= rsMin
+                d.z_score >= zMin && (d.rs_rating || 0) >= rsMin
             );
 
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = filtered.map(d => `
                 <tr>
                     <td class="font-bold text-white">${d.ticker}</td>
-                    <td class="mono">$${fmt(d.price)}</td>
-                    <td class="mono font-bold ${d.z_score < -1 ? 'text-emerald-400' : d.z_score > 1 ? 'text-red-400' : 'text-slate-300'}">${fmt(d.z_score)}</td>
-                    <td class="mono text-blue-400">${d.rs_rating || '-'}</td>
-                    <td class="mono">${fmt(d.volume_pct)}%</td>
+                    <td class="mono font-mono">$${fmt(d.price)}</td>
+                    <td class="mono font-mono ${d.z_score < -1 ? 'text-emerald-400' : 'text-slate-300'}">${fmt(d.z_score)}</td>
+                    <td class="mono font-mono text-blue-400">${d.rs_rating || '-'}</td>
+                    <td class="mono font-mono">${fmt(d.volume_pct)}%</td>
                     <td class="text-center">${d.above_50ma ? '✅' : '❌'}</td>
                     <td class="text-center">${d.above_200ma ? '✅' : '❌'}</td>
-                    <td class="mono">$${fmt(d.year_high)}</td>
-                    <td class="mono">$${fmt(d.year_low)}</td>
-                    <td class="mono text-orange-400">${fmt(d.dist_from_high)}%</td>
-                    <td class="mono text-emerald-400 font-bold">+${fmt(d.gain_pct)}%</td>
+                    <td class="mono font-mono">$${fmt(d.year_high)}</td>
+                    <td class="mono font-mono">$${fmt(d.year_low)}</td>
+                    <td class="mono font-mono text-orange-400">${fmt(d.dist_from_high)}%</td>
+                    <td class="mono font-mono text-emerald-400 font-bold">+${fmt(d.gain_pct)}%</td>
                 </tr>
             `).join('');
 
-            if (originalJson) renderStats(originalJson, filtered);
+            if (json) renderStats(json, filtered);
         }
 
         function resetFilters() {
             document.getElementById('z-min').value = -3;
-            document.getElementById('z-max').value = 3;
             document.getElementById('rs-min').value = 0;
             applyFilters();
         }
