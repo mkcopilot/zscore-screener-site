@@ -1,976 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Z-Score Recovery Screener</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
-<style>
-/* ── CSS Variables ─────────────────────────────────────────── */
-:root {
-  --bg:          #F4F1EA;
-  --bg2:         #EDEAE0;
-  --surface:     #FFFFFF;
-  --surface2:    #FAF9F6;
-  --border:      #DDD9CE;
-  --border2:     #C9C4B8;
-  --text:        #1C1917;
-  --text2:       #57534E;
-  --text3:       #A8A29E;
-  --green:       #0A6B42;
-  --green-bg:    #DCFCE7;
-  --green-mid:   #16A34A;
-  --red:         #B91C1C;
-  --red-bg:      #FEE2E2;
-  --amber:       #B45309;
-  --amber-bg:    #FEF3C7;
-  --blue:        #1D4ED8;
-  --blue-bg:     #DBEAFE;
-  --navy:        #1E2E4A;
-  --accent:      #0A6B42;
-  --font-serif:  'Libre Baskerville', Georgia, serif;
-  --font-mono:   'IBM Plex Mono', 'Courier New', monospace;
-  --font-sans:   'DM Sans', system-ui, sans-serif;
-  --radius:      6px;
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:   0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-}
-
-/* ── Reset & Base ──────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: var(--font-sans);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-/* ── Header ────────────────────────────────────────────────── */
-.site-header {
-  background: var(--navy);
-  padding: 0 32px;
-  border-bottom: 3px solid var(--green);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 56px;
-}
-.site-header .brand {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-.brand-title {
-  font-family: var(--font-serif);
-  font-size: 18px;
-  color: #FFFFFF;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-}
-.brand-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--green-mid);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  border: 1px solid var(--green-mid);
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-.header-meta {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-.scan-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: rgba(255,255,255,0.6);
-}
-.scan-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: var(--green-mid);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-.refresh-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: var(--radius);
-  color: rgba(255,255,255,0.8);
-  font-family: var(--font-sans);
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.refresh-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-.refresh-btn svg { width: 13px; height: 13px; }
-
-/* ── Page Layout ───────────────────────────────────────────── */
-.page {
-  max-width: 1540px;
-  margin: 0 auto;
-  padding: 28px 24px 60px;
-}
-
-/* ── Hero Row ──────────────────────────────────────────────── */
-.hero-row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 24px;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.hero-title {
-  font-family: var(--font-serif);
-  font-size: 30px;
-  font-weight: 700;
-  color: var(--navy);
-  letter-spacing: -0.5px;
-  line-height: 1.15;
-}
-.hero-title em {
-  font-style: italic;
-  color: var(--green);
-}
-.hero-subtitle {
-  font-size: 13px;
-  color: var(--text2);
-  margin-top: 6px;
-  font-weight: 300;
-  max-width: 540px;
-  line-height: 1.6;
-}
-
-/* ── Stat Cards ────────────────────────────────────────────── */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-@media (max-width: 1100px) { .stats-row { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 600px)  { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-
-.stat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.15s;
-}
-.stat-card:hover { box-shadow: var(--shadow-md); }
-.stat-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text3);
-  margin-bottom: 6px;
-}
-.stat-value {
-  font-family: var(--font-mono);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1;
-}
-.stat-value.green { color: var(--green); }
-.stat-value.amber { color: var(--amber); }
-.stat-value.blue  { color: var(--blue);  }
-.stat-sub {
-  font-size: 11px;
-  color: var(--text3);
-  margin-top: 4px;
-}
-
-/* ── Criteria Pills ────────────────────────────────────────── */
-.criteria-bar {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 18px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.criteria-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text3);
-  margin-right: 4px;
-  white-space: nowrap;
-}
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
-  border-radius: 20px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.pill-green { background: var(--green-bg);  color: var(--green); }
-.pill-blue  { background: var(--blue-bg);   color: var(--blue);  }
-.pill-amber { background: var(--amber-bg);  color: var(--amber); }
-.pill-dot   { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-
-/* ── Controls ──────────────────────────────────────────────── */
-.controls-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-.search-wrap {
-  position: relative;
-  flex: 1;
-  min-width: 200px;
-  max-width: 320px;
-}
-.search-wrap svg {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text3);
-  width: 14px; height: 14px;
-  pointer-events: none;
-}
-.search-input {
-  width: 100%;
-  padding: 8px 12px 8px 32px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-family: var(--font-sans);
-  font-size: 13px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.15s;
-}
-.search-input:focus { border-color: var(--green-mid); }
-
-.filter-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.filter-label {
-  font-size: 12px;
-  color: var(--text2);
-  white-space: nowrap;
-  font-weight: 500;
-}
-.select-box {
-  padding: 7px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-family: var(--font-sans);
-  font-size: 12px;
-  color: var(--text);
-  cursor: pointer;
-  outline: none;
-}
-.select-box:focus { border-color: var(--green-mid); }
-
-.export-btn {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
-  background: var(--navy);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.15s;
-  margin-left: auto;
-}
-.export-btn:hover { background: #2d3f5a; }
-.export-btn svg { width: 13px; height: 13px; }
-
-/* ── Table ─────────────────────────────────────────────────── */
-.table-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-.table-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-thead tr {
-  background: var(--navy);
-}
-thead th {
-  padding: 11px 13px;
-  text-align: left;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: rgba(255,255,255,0.75);
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
-  border-right: 1px solid rgba(255,255,255,0.07);
-  transition: color 0.12s;
-}
-thead th:last-child { border-right: none; }
-thead th:hover { color: #fff; }
-thead th.sort-asc::after  { content: " ↑"; color: var(--green-mid); }
-thead th.sort-desc::after { content: " ↓"; color: var(--green-mid); }
-
-tbody tr {
-  border-bottom: 1px solid var(--border);
-  transition: background 0.1s;
-  animation: rowIn 0.25s ease both;
-}
-@keyframes rowIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: none; }
-}
-tbody tr:last-child { border-bottom: none; }
-tbody tr:hover { background: var(--surface2); }
-
-td {
-  padding: 11px 13px;
-  vertical-align: middle;
-  border-right: 1px solid var(--border);
-  white-space: nowrap;
-}
-td:last-child { border-right: none; }
-
-/* Ticker cell */
-.ticker-cell { display: flex; flex-direction: column; gap: 2px; }
-.ticker-sym {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--navy);
-}
-.ticker-name {
-  font-size: 11px;
-  color: var(--text3);
-  max-width: 130px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Mono number */
-.mono { font-family: var(--font-mono); }
-
-/* Chips / badges */
-.chip {
-  display: inline-block;
-  padding: 2px 7px;
-  border-radius: 3px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-}
-.chip-green  { background: var(--green-bg);  color: var(--green); }
-.chip-red    { background: var(--red-bg);    color: var(--red); }
-.chip-amber  { background: var(--amber-bg);  color: var(--amber); }
-.chip-blue   { background: var(--blue-bg);   color: var(--blue); }
-.chip-neutral{ background: var(--bg2);       color: var(--text2); }
-
-/* Z-bar meter */
-.zbar-wrap { display: flex; align-items: center; gap: 6px; }
-.zbar-bg {
-  width: 54px; height: 5px;
-  background: var(--bg2);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.zbar-fill {
-  height: 100%;
-  background: var(--green-mid);
-  border-radius: 3px;
-  transition: width 0.4s ease;
-}
-
-/* RSI gauge */
-.rsi-ring {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  border: 2px solid currentColor;
-}
-.rsi-os   { color: var(--red);   background: var(--red-bg);   }
-.rsi-rec  { color: var(--amber); background: var(--amber-bg); }
-.rsi-neu  { color: var(--blue);  background: var(--blue-bg);  }
-.rsi-bull { color: var(--green); background: var(--green-bg); }
-
-/* Trade levels mini bar */
-.levels-bar {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-.lvl-stop  { color: var(--red);   }
-.lvl-entry { color: var(--amber); }
-.lvl-pt1   { color: var(--green); }
-.lvl-sep   { color: var(--text3); }
-
-/* PT1 upside chip */
-.pt1-upside-pos { color: var(--green); }
-.pt1-upside-neg { color: var(--red);   }
-.pt1-upside-neu { color: var(--text3); }
-
-/* ── Early Stage Badge ─────────────────────────────────────── */
-.early-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  background: #FFF7ED;
-  color: #C2410C;
-  border: 1px solid #FED7AA;
-  white-space: nowrap;
-  box-shadow: 0 0 0 2px rgba(251,146,60,0.15);
-}
-.early-badge::before { content: "⚡"; font-size: 9px; }
-.early-none { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
-tbody tr.is-early { background: #FFFBF5; }
-tbody tr.is-early:hover { background: #FFF3E0; }
-.early-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 13px;
-  border: 1px solid #FED7AA;
-  border-radius: var(--radius);
-  background: #FFF7ED;
-  color: #C2410C;
-  font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.early-toggle:hover  { background: #FEE8CC; }
-.early-toggle.active { background: #C2410C; color: #fff; border-color: #C2410C; }
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-}
-.empty-state-icon { font-size: 40px; margin-bottom: 12px; }
-.empty-state p { color: var(--text2); font-size: 14px; }
-
-/* ── Footer ────────────────────────────────────────────────── */
-.site-footer {
-  text-align: center;
-  padding: 24px;
-  border-top: 1px solid var(--border);
-  font-size: 11px;
-  color: var(--text3);
-  font-family: var(--font-mono);
-  margin-top: 40px;
-}
-.site-footer a { color: var(--green); text-decoration: none; }
-
-/* ── Loading overlay ───────────────────────────────────────── */
-#loading {
-  position: fixed; inset: 0;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  gap: 16px;
-  transition: opacity 0.3s;
-}
-.loader-spin {
-  width: 36px; height: 36px;
-  border: 3px solid var(--border);
-  border-top-color: var(--green-mid);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.loader-text { font-family: var(--font-mono); font-size: 12px; color: var(--text3); }
-
-/* ── Result count bar ──────────────────────────────────────── */
-.result-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  padding: 0 2px;
-}
-.result-count {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text3);
-}
-.result-count strong { color: var(--text); }
-
-/* ── Column group divider ──────────────────────────────────── */
-.col-divider { background: rgba(255,255,255,0.03); }
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Z-Score Recovery Screener</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        /* CSS variables and styles kept from your original for brevity */
+        :root {
+            --bg: #F4F1EA; --bg2: #EDEAE0; --surface: #FFFFFF; --surface2: #FAF9F6;
+            --border: #DDD9CE; --border2: #C9C4B8; --text: #1C1917; --text2: #57534E;
+            --green: #0A6B42; --navy: #1E2E4A; --font-sans: 'DM Sans', sans-serif;
+        }
+        body { font-family: var(--font-sans); background: var(--bg); color: var(--text); margin: 0; }
+        .site-header { background: var(--navy); padding: 0 32px; border-bottom: 3px solid var(--green); display: flex; align-items: center; height: 56px; color: white; position: sticky; top: 0; z-index: 100; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+        .filter-bar { background: var(--surface); border: 1px solid var(--border); padding: 16px; display: flex; gap: 20px; align-items: flex-end; margin-bottom: 24px; border-radius: 8px; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 6px; }
+        .filter-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text2); font-weight: 600; }
+        .select-box, .search-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface2); font-size: 13px; min-width: 160px; }
+        table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        th { background: var(--surface2); padding: 12px; text-align: left; border-bottom: 2px solid var(--border); font-size: 12px; text-transform: uppercase; color: var(--text2); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(244,241,234,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; font-weight: bold; }
+        a { color: var(--green); text-decoration: none; font-weight: 600; }
+        a:hover { text-decoration: underline; }
+    </style>
 </head>
-
 <body>
 
-<!-- Loading -->
-<div id="loading">
-  <div class="loader-spin"></div>
-  <div class="loader-text">Loading screener data…</div>
-</div>
-
-<!-- Header -->
 <header class="site-header">
-  <div class="brand">
-    <span class="brand-title">Z·Score Recovery</span>
-    <span class="brand-tag">Screener</span>
-  </div>
-  <div class="header-meta">
-    <div class="scan-badge">
-      <div class="scan-dot"></div>
-      <span id="scan-time">—</span>
-    </div>
-    <button class="refresh-btn" onclick="window.location.reload()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-      </svg>
-      Refresh
-    </button>
-  </div>
+    <div class="brand"><strong>Z-SCORE</strong> SCREENER</div>
 </header>
 
-<!-- Page -->
-<main class="page">
+<div class="container">
+    <div class="filter-bar">
+        <div class="filter-group">
+            <span class="filter-label">History Archive</span>
+            <select class="select-box" id="history-select">
+                <option value="live">Latest (Live)</option>
+            </select>
+        </div>
 
-  <!-- Hero -->
-  <div class="hero-row">
-    <div>
-      <h1 class="hero-title">Z-Score <em>Recovery</em> Scanner</h1>
-      <p class="hero-subtitle">Identifies S&amp;P 500 &amp; NASDAQ stocks where price is above the 200 SMA, RSI has recently recovered from oversold territory (crossed above 35), and the normalized z-score has turned positive — signaling early mean-reversion strength.</p>
-    </div>
-  </div>
+        <div class="filter-group">
+            <span class="filter-label">Search Ticker</span>
+            <input type="text" id="search-input" class="search-input" placeholder="e.g. AAPL">
+        </div>
 
-  <!-- Criteria Bar -->
-  <div class="criteria-bar">
-    <span class="criteria-label">Active Filters</span>
-    <span class="pill pill-green"><span class="pill-dot"></span>Close ≥ SMA 200</span>
-    <span class="pill pill-green"><span class="pill-dot"></span>Z-Score &gt; 0</span>
-    <span class="pill pill-amber"><span class="pill-dot"></span>RSI crossed ↑35 within 20 bars</span>
-    <span class="pill pill-blue"><span class="pill-dot"></span>Avg Vol 50d &gt; 1M</span>
-    <span class="pill pill-blue"><span class="pill-dot"></span>Mkt Cap ≥ $1B</span>
-    <span class="pill pill-blue"><span class="pill-dot"></span>Price ≥ $10</span>
-    <span class="pill pill-neutral">SP500 + NASDAQ universe</span>
-  </div>
-
-  <!-- Stats Cards -->
-  <div class="stats-row" id="stats-row">
-    <div class="stat-card">
-      <div class="stat-label">Signals Found</div>
-      <div class="stat-value green" id="stat-signals">—</div>
-      <div class="stat-sub" id="stat-universe">of — stocks scanned</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg Z-Score</div>
-      <div class="stat-value" id="stat-zscore">—</div>
-      <div class="stat-sub">normalized momentum</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg RSI</div>
-      <div class="stat-value amber" id="stat-rsi">—</div>
-      <div class="stat-sub">recovery zone</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Avg Gain</div>
-      <div class="stat-value green" id="stat-gain">—</div>
-      <div class="stat-sub">from entry price</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Best Performer</div>
-      <div class="stat-value blue" id="stat-best">—</div>
-      <div class="stat-sub" id="stat-best-name">—</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Last Scan</div>
-      <div class="stat-value" id="stat-date" style="font-size:16px;">—</div>
-      <div class="stat-sub">auto-refresh 5PM EST</div>
-    </div>
-  </div>
-
-  <!-- Controls -->
-  <div class="controls-row">
-    <div class="search-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-      </svg>
-      <input class="search-input" type="text" id="search" placeholder="Search ticker or name…" />
+        <div class="filter-group">
+            <span class="filter-label">Sector</span>
+            <select id="sector-filter" class="select-box">
+                <option value="all">All Sectors</option>
+            </select>
+        </div>
     </div>
 
-    <div class="filter-group">
-      <span class="filter-label">Min Gain</span>
-      <select class="select-box" id="filter-gain">
-        <option value="0">Any</option>
-        <option value="1">≥ 1%</option>
-        <option value="2">≥ 2%</option>
-        <option value="3">≥ 3%</option>
-        <option value="5">≥ 5%</option>
-      </select>
-    </div>
+    <div id="stats-summary" style="margin-bottom: 20px; font-weight: bold;"></div>
 
-    <div class="filter-group">
-      <span class="filter-label">RSI Range</span>
-      <select class="select-box" id="filter-rsi">
-        <option value="0">Any</option>
-        <option value="35">35–50 (recovery)</option>
-        <option value="50">50–65 (neutral)</option>
-        <option value="65">65+ (strong)</option>
-      </select>
-    </div>
-
-    <div class="filter-group">
-      <span class="filter-label">Z-Score Bars</span>
-      <select class="select-box" id="filter-zbars">
-        <option value="0">Any</option>
-        <option value="3">≥ 3 bars</option>
-        <option value="5">≥ 5 bars</option>
-        <option value="8">≥ 8 bars</option>
-        <option value="10">≥ 10 bars</option>
-      </select>
-    </div>
-
-    <button class="early-toggle" id="early-toggle">
-      ⚡ Early Stage Only
-    </button>
-
-    <button class="export-btn" id="export-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      Export CSV
-    </button>
-  </div>
-
-  <!-- Result bar -->
-  <div class="result-bar">
-    <div class="result-count" id="result-count">Showing <strong>0</strong> signals</div>
-    <div class="result-count" id="early-count" style="color:var(--amber)"></div>
-  </div>
-
-  <!-- Table -->
-  <div class="table-wrap">
-    <div class="table-scroll">
-      <table id="main-table">
+    <table id="results-table">
         <thead>
-          <tr>
-            <th data-col="ticker">Ticker</th>
-            <th data-col="close">Close</th>
-            <th data-col="entry_price">Entry</th>
-            <th data-col="stop_price">Stop</th>
-            <th data-col="risk_pct">Risk%</th>
-            <th data-col="pt1">PT1 (1:1)</th>
-            <th data-col="pt1_upside_pct">PT1 Left</th>
-            <th data-col="gain_pct">% Gain</th>
-            <th data-col="days_since_entry">Days</th>
-            <th data-col="zscore">Z-Score</th>
-            <th data-col="zscore_green_bars">✦ Z Bars</th>
-            <th data-col="is_early">Stage</th>
-            <th data-col="rsi">RSI</th>
-            <th data-col="market_cap_b">Mkt Cap</th>
-            <th data-col="avg_vol_50d_m">Avg Vol 50d</th>
-            <th data-col="sma200">SMA 200</th>
-            <th data-col="sma50">SMA 50</th>
-            <th data-col="sma20">SMA 20</th>
-            <th data-col="high_52w">52W High</th>
-            <th data-col="pct_off_high">Off High</th>
-            <th data-col="atr_pct">ATR%</th>
-          </tr>
+            <tr>
+                <th>Ticker</th>
+                <th>Price</th>
+                <th>Z-Score</th>
+                <th>RSI</th>
+                <th>Sector</th>
+            </tr>
         </thead>
-        <tbody id="table-body"></tbody>
-      </table>
-    </div>
-  </div>
+        <tbody id="table-body">
+            </tbody>
+    </table>
+</div>
 
-</main>
-
-<footer class="site-footer">
-  <p>Z-Score Recovery Screener · SP500 &amp; NASDAQ Universe · Scans daily after 5:00 PM EST via <a href=".github/workflows/daily_scan.yml">GitHub Actions</a> · Data: Yahoo Finance · Not financial advice.</p>
-</footer>
+<div id="loading" class="loading-overlay">LOADING DATA...</div>
 
 <script>
-// ── State ─────────────────────────────────────────────────────
-let allData = [];
-let sortCol = 'gain_pct';
-let sortDir = -1;   // -1 = desc, 1 = asc
-let earlyOnly = false;
+    let allData = [];
 
-// ── Helpers ───────────────────────────────────────────────────
-const fmt = (n, d=2) => n == null ? '—' : Number(n).toFixed(d);
-const fmtPct = n => (n >= 0 ? '+' : '') + fmt(n, 2) + '%';
-const fmtCur = n => '$' + fmt(n, 2);
-const fmtB   = n => n >= 1000 ? '$' + fmt(n/1000, 1) + 'T' : '$' + fmt(n, 1) + 'B';
-const avg    = arr => arr.reduce((a,b) => a+b, 0) / arr.length;
+    // Helper for Finviz Links
+    function finvizUrl(t) {
+        return `https://finviz.com/quote.ashx?t=${encodeURIComponent(t)}`;
+    }
 
-function rsiClass(rsi) {
-  if (rsi < 35)  return 'rsi-os';
-  if (rsi < 50)  return 'rsi-rec';
-  if (rsi < 65)  return 'rsi-neu';
-  return 'rsi-bull';
-}
-function gainChip(g) {
-  if (g >= 3)  return `<span class="chip chip-green">${fmtPct(g)}</span>`;
-  if (g >= 0)  return `<span class="chip chip-amber">${fmtPct(g)}</span>`;
-  return       `<span class="chip chip-red">${fmtPct(g)}</span>`;
-}
-function zChip(z) {
-  const cls = z > 0.5 ? 'chip-green' : z > 0 ? 'chip-amber' : 'chip-red';
-  return `<span class="chip ${cls}">${fmt(z)}</span>`;
-}
-function zBarMeter(bars) {
-  const pct = Math.min(bars / 15 * 100, 100);
-  return `<div class="zbar-wrap">
-    <div class="zbar-bg"><div class="zbar-fill" style="width:${pct}%"></div></div>
-    <span class="mono" style="font-size:12px;">${bars}</span>
-  </div>`;
-}
-function offHighChip(v) {
-  const cls = v > -5 ? 'chip-green' : v > -15 ? 'chip-neutral' : 'chip-amber';
-  return `<span class="chip ${cls}">${fmtPct(v)}</span>`;
-}
+    // 1. Load the list of past scans
+    async function loadHistoryManifest() {
+        try {
+            const res = await fetch('data/history_manifest.json');
+            if (!res.ok) return;
+            const files = await res.json();
+            const select = document.getElementById('history-select');
+            
+            // Files are named scan_YYYY-MM-DD.json
+            files.forEach(file => {
+                const date = file.replace('scan_', '').replace('.json', '');
+                const opt = document.createElement('option');
+                opt.value = `data/history/${file}`;
+                opt.textContent = date;
+                select.appendChild(opt);
+            });
+        } catch (e) {
+            console.log("Manifest not found yet.");
+        }
+    }
 
-function pt1UpsideChip(v) {
-  if (v === null || v === undefined) return '—';
-  const cls = v > 0.5 ? 'pt1-upside-pos' : v < -0.5 ? 'pt1-upside-neg' : 'pt1-upside-neu';
-  return `<span class="mono ${cls}">${fmtPct(v)}</span>`;
-}
-function riskChip(r) {
-  const cls = r <= 3 ? 'chip-green' : r <= 5 ? 'chip-amber' : 'chip-red';
-  return `<span class="chip ${cls}">${fmt(r)}%</span>`;
-}
-// Finviz ticket search
-function finvizUrl(t) { return 'https://finviz.com/quote.ashx?t=' + encodeURIComponent(t); }
-  // ── Render Table ───────────────────────────────────────────────
-function renderTable(rows) {
-  const tbody = document.getElementById('table-body');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="21">
-      <div class="empty-state">
-        <div class="empty-state-icon">📊</div>
-        <p>No signals match the current filters.</p>
-      </div>
-    </td></tr>`;
-    document.getElementById('result-count').innerHTML = `Showing <strong>0</strong> signals`;
-    return;
-  }
-  const earlyCount = rows.filter(r => r.zscore_green_bars <= 4).length;
-  document.getElementById('result-count').innerHTML = `Showing <strong>${rows.length}</strong> signal${rows.length !== 1 ? 's' : ''}`;
-  document.getElementById('early-count').innerHTML  = earlyCount > 0
-    ? `⚡ <strong>${earlyCount}</strong> early stage`
-    : '';
-  tbody.innerHTML = rows.map((r, i) => {
-    const early = r.zscore_green_bars <= 4;
-    const stageBadge = early
-      ? `<span class="early-badge">Early</span>`
-      : `<span class="early-none">${r.zscore_green_bars <= 8 ? 'Building' : 'Mature'}</span>`;
-    return `
-    <tr class="${early ? 'is-early' : ''}" style="animation-delay:${i * 18}ms">
-      <td>
-        <div class="ticker-cell">
-          <span class="ticker-sym"><a href="${finvizUrl(r.ticker)}" target="_blank" style="text-decoration:none; color:inherit;">${r.ticker}</a></span>
-          <span class="ticker-name">${r.name}</span>
-        </div>
-      </td>
-      <td class="mono">${fmtCur(r.close)}</td>
-      <td class="mono" style="color:var(--amber)">${fmtCur(r.entry_price)}</td>
-      <td class="mono" style="color:var(--red)">${fmtCur(r.stop_price)}</td>
-      <td>${riskChip(r.risk_pct)}</td>
-      <td class="mono" style="color:var(--green);font-weight:600">${fmtCur(r.pt1)}</td>
-      <td>${pt1UpsideChip(r.pt1_upside_pct)}</td>
-      <td>${gainChip(r.gain_pct)}</td>
-      <td class="mono" style="color:var(--text2)">${r.days_since_entry}d</td>
-      <td>${zChip(r.zscore)}</td>
-      <td>${zBarMeter(r.zscore_green_bars)}</td>
-      <td>${stageBadge}</td>
-      <td><span class="rsi-ring ${rsiClass(r.rsi)}">${fmt(r.rsi,0)}</span></td>
-      <td class="mono">${fmtB(r.market_cap_b)}</td>
-      <td class="mono" style="color:var(--text2)">${fmt(r.avg_vol_50d_m,1)}M</td>
-      <td class="mono" style="color:var(--text2)">${fmtCur(r.sma200)}</td>
-      <td class="mono" style="color:var(--text2)">${fmtCur(r.sma50)}</td>
-      <td class="mono" style="color:var(--text2)">${fmtCur(r.sma20)}</td>
-      <td class="mono">${fmtCur(r.high_52w)}</td>
-      <td>${offHighChip(r.pct_off_high)}</td>
-      <td class="mono" style="color:var(--text2)">${fmt(r.atr_pct)}%</td>
-    </tr>`;
-  }).join('');
-}
+    // 2. Load data from a specific file
+    async function loadData(path = 'data/screener_results.json') {
+        const loader = document.getElementById('loading');
+        loader.style.display = 'flex';
 
-// ── Filtering ─────────────────────────────────────────────────
-function applyFilters() {
-  const q      = document.getElementById('search').value.toLowerCase();
-  const minGain= parseFloat(document.getElementById('filter-gain').value);
-  const rsiF   = document.getElementById('filter-rsi').value;
-  const zBarsF = parseInt(document.getElementById('filter-zbars').value);
+        try {
+            const res = await fetch(`${path}?t=${Date.now()}`);
+            const json = await res.json();
+            allData = json.results || [];
+            
+            document.getElementById('stats-summary').textContent = 
+                `Showing ${allData.length} symbols from ${path === 'data/screener_results.json' ? 'Latest Scan' : 'Archive'}`;
+            
+            renderTable(allData);
+        } catch (e) {
+            console.error("Error loading data", e);
+        } finally {
+            loader.style.display = 'none';
+        }
+    }
 
-  let rows = allData.filter(r => {
-    if (q && !r.ticker.toLowerCase().includes(q) && !r.name.toLowerCase().includes(q)) return false;
-    if (r.gain_pct < minGain) return false;
-    if (rsiF === '35' && !(r.rsi >= 35 && r.rsi < 50)) return false;
-    if (rsiF === '50' && !(r.rsi >= 50 && r.rsi < 65)) return false;
-    if (rsiF === '65' && r.rsi < 65) return false;
-    if (r.zscore_green_bars < zBarsF) return false;
-    if (earlyOnly && r.zscore_green_bars > 4) return false;
-    return true;
-  });
+    function renderTable(data) {
+        const body = document.getElementById('table-body');
+        body.innerHTML = data.map(r => `
+            <tr>
+                <td><a href="${finvizUrl(r.ticker)}" target="_blank">${r.ticker}</a></td>
+                <td>$${r.close}</td>
+                <td>${r.zscore}</td>
+                <td>${r.rsi}</td>
+                <td>${r.sector}</td>
+            </tr>
+        `).join('');
+    }
 
-  rows = [...rows].sort((a, b) => {
-    const av = a[sortCol] ?? 0;
-    const bv = b[sortCol] ?? 0;
-    if (typeof av === 'string') return av.localeCompare(bv) * sortDir;
-    return (av - bv) * sortDir;
-  });
+    // 3. Event Listeners
+    document.getElementById('history-select').addEventListener('change', (e) => {
+        const path = e.target.value === 'live' ? 'data/screener_results.json' : e.target.value;
+        loadData(path);
+    });
 
-  renderTable(rows);
-}
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        const val = e.target.value.toUpperCase();
+        const filtered = allData.filter(r => r.ticker.includes(val));
+        renderTable(filtered);
+    });
 
-// ── Sort headers ───────────────────────────────────────────────
-document.querySelectorAll('thead th').forEach(th => {
-  th.addEventListener('click', () => {
-    const col = th.dataset.col;
-    if (!col) return;
-    if (sortCol === col) sortDir *= -1;
-    else { sortCol = col; sortDir = -1; }
-    document.querySelectorAll('thead th').forEach(h => h.classList.remove('sort-asc','sort-desc'));
-    th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc');
-    applyFilters();
-  });
-});
-// Mark initial sort col
-document.querySelector(`th[data-col="${sortCol}"]`)?.classList.add('sort-desc');
-
-// ── Filter controls ────────────────────────────────────────────
-['search','filter-gain','filter-rsi','filter-zbars'].forEach(id =>
-  document.getElementById(id).addEventListener('input', applyFilters));
-['filter-gain','filter-rsi','filter-zbars'].forEach(id =>
-  document.getElementById(id).addEventListener('change', applyFilters));
-
-document.getElementById('early-toggle').addEventListener('click', function() {
-  earlyOnly = !earlyOnly;
-  this.classList.toggle('active', earlyOnly);
-  applyFilters();
-});
-
-// ── Export CSV ─────────────────────────────────────────────────
-document.getElementById('export-btn').addEventListener('click', () => {
-  const headers = ['ticker','name','close','entry_price','stop_price','risk_pct',
-    'pt1','pt1_upside_pct','gain_pct','entry_date',
-    'days_since_entry','market_cap_b','avg_vol_50d_m','rsi','zscore',
-    'zscore_green_bars','sma200','sma50','sma20','high_52w','low_52w','pct_off_high','atr_pct'];
-  const rows = [headers.join(',')];
-  allData.forEach(r => rows.push(headers.map(h => r[h] ?? '').join(',')));
-  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `zscore_signals_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-});
-
-// ── Stats ─────────────────────────────────────────────────────
-function renderStats(data, meta) {
-  const sigs   = data.results;
-  document.getElementById('stat-signals').textContent  = sigs.length;
-  document.getElementById('stat-universe').textContent  = `of ${meta.universe_count} stocks scanned`;
-  document.getElementById('stat-zscore').textContent    = fmt(avg(sigs.map(r=>r.zscore)));
-  document.getElementById('stat-rsi').textContent       = fmt(avg(sigs.map(r=>r.rsi)),1);
-  document.getElementById('stat-gain').textContent      = '+' + fmt(avg(sigs.map(r=>r.gain_pct))) + '%';
-  const best = sigs.reduce((a,b) => a.gain_pct > b.gain_pct ? a : b, sigs[0]);
-  document.getElementById('stat-best').textContent      = best ? '+' + fmt(best.gain_pct) + '%' : '—';
-  document.getElementById('stat-best-name').textContent = best ? best.ticker : '—';
-  document.getElementById('stat-date').textContent      = meta.scan_date;
-  document.getElementById('scan-time').textContent      = 'Scanned ' + meta.scan_timestamp;
-}
-
-// ── Load Data ─────────────────────────────────────────────────
-async function loadData() {
-  try {
-    const res = await fetch(`data/screener_results.json?t=${Date.now()}`);
-    if (!res.ok) throw new Error('Failed to load');
-    const json = await res.json();
-    allData = json.results || [];
-    renderStats(json, json);
-    applyFilters();
-  } catch (e) {
-    console.error(e);
-    document.getElementById('table-body').innerHTML = `<tr><td colspan="21">
-      <div class="empty-state">
-        <div class="empty-state-icon">⚠️</div>
-        <p>Could not load screener data. Run the scanner script first.</p>
-      </div>
-    </td></tr>`;
-  } finally {
-    const overlay = document.getElementById('loading');
-    overlay.style.opacity = '0';
-    setTimeout(() => overlay.remove(), 300);
-  }
-}
-
-loadData();
+    // Initialize
+    loadHistoryManifest();
+    loadData();
 </script>
+
 </body>
 </html>
