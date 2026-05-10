@@ -804,7 +804,9 @@ function riskChip(r) {
   const cls = r <= 3 ? 'chip-green' : r <= 5 ? 'chip-amber' : 'chip-red';
   return `<span class="chip ${cls}">${fmt(r)}%</span>`;
 }
-// ── Render Table ───────────────────────────────────────────────
+// Finviz ticket search
+function finvizUrl(t) { return 'https://finviz.com/quote.ashx?t=' + encodeURIComponent(t); }
+  // ── Render Table ───────────────────────────────────────────────
 function renderTable(rows) {
   const tbody = document.getElementById('table-body');
   if (!rows.length) {
@@ -831,7 +833,7 @@ function renderTable(rows) {
     <tr class="${early ? 'is-early' : ''}" style="animation-delay:${i * 18}ms">
       <td>
         <div class="ticker-cell">
-          <span class="ticker-sym">${r.ticker}</span>
+          <span class="ticker-sym"><a href="${finvizUrl(r.ticker)}" target="_blank" style="text-decoration:none; color:inherit;">${r.ticker}</a></span>
           <span class="ticker-name">${r.name}</span>
         </div>
       </td>
