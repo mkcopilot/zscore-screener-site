@@ -11,32 +11,32 @@
 <style>
 /* ── CSS Variables ─────────────────────────────────────────── */
 :root {
-  --bg:          #F4F1EA;
-  --bg2:         #EDEAE0;
-  --surface:     #FFFFFF;
-  --surface2:    #FAF9F6;
-  --border:      #DDD9CE;
-  --border2:     #C9C4B8;
-  --text:        #1C1917;
-  --text2:       #57534E;
-  --text3:       #A8A29E;
-  --green:       #0A6B42;
-  --green-bg:    #DCFCE7;
-  --green-mid:   #16A34A;
-  --red:         #B91C1C;
-  --red-bg:      #FEE2E2;
-  --amber:       #B45309;
-  --amber-bg:    #FEF3C7;
-  --blue:        #1D4ED8;
-  --blue-bg:     #DBEAFE;
-  --navy:        #1E2E4A;
-  --accent:      #0A6B42;
+  --bg:          #0a0e14;
+  --bg2:         #07090f;
+  --surface:     #111720;
+  --surface2:    #161e2a;
+  --border:      #1e2a38;
+  --border2:     #2a3a4d;
+  --text:        #ecebe6;
+  --text2:       #8a96a6;
+  --text3:       #5b6776;
+  --green:       #5ec77a;
+  --green-bg:    rgba(94,199,122,0.12);
+  --green-mid:   #4eb368;
+  --red:         #e85a5a;
+  --red-bg:      rgba(232,90,90,0.12);
+  --amber:       #d4a655;
+  --amber-bg:    rgba(212,166,85,0.14);
+  --blue:        #6a9eff;
+  --blue-bg:     rgba(106,158,255,0.12);
+  --navy:        #1e2a38;
+  --accent:      #d4a655;
   --font-serif:  'Libre Baskerville', Georgia, serif;
   --font-mono:   'IBM Plex Mono', 'Courier New', monospace;
   --font-sans:   'DM Sans', system-ui, sans-serif;
   --radius:      6px;
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md:   0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.18);
+  --shadow-md:   0 4px 12px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.22);
 }
 
 /* ── Reset & Base ──────────────────────────────────────────── */
@@ -72,7 +72,7 @@ body {
 .brand-title {
   font-family: var(--font-serif);
   font-size: 18px;
-  color: #FFFFFF;
+  color: var(--text);
   font-weight: 700;
   letter-spacing: -0.3px;
 }
@@ -320,7 +320,7 @@ body {
   transition: background 0.15s;
   margin-left: auto;
 }
-.export-btn:hover { background: #2d3f5a; }
+.export-btn:hover { background: var(--border2); }
 .export-btn svg { width: 13px; height: 13px; }
 
 /* ── Table ─────────────────────────────────────────────────── */
@@ -481,25 +481,25 @@ td:last-child { border-right: none; }
   font-weight: 600;
   letter-spacing: 0.6px;
   text-transform: uppercase;
-  background: #FFF7ED;
-  color: #C2410C;
-  border: 1px solid #FED7AA;
+  background: var(--amber-bg);
+  color: var(--amber);
+  border: 1px solid rgba(212,166,85,0.4);
   white-space: nowrap;
-  box-shadow: 0 0 0 2px rgba(251,146,60,0.15);
+  box-shadow: 0 0 0 2px rgba(212,166,85,0.18);
 }
 .early-badge::before { content: "⚡"; font-size: 9px; }
 .early-none { font-family: var(--font-mono); font-size: 11px; color: var(--text3); }
-tbody tr.is-early { background: #FFFBF5; }
-tbody tr.is-early:hover { background: #FFF3E0; }
+tbody tr.is-early { background: rgba(212,166,85,0.05); }
+tbody tr.is-early:hover { background: rgba(212,166,85,0.22); }
 .early-toggle {
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 7px 13px;
-  border: 1px solid #FED7AA;
+  border: 1px solid rgba(212,166,85,0.4);
   border-radius: var(--radius);
-  background: #FFF7ED;
-  color: #C2410C;
+  background: var(--amber-bg);
+  color: var(--amber);
   font-family: var(--font-sans);
   font-size: 12px;
   font-weight: 600;
@@ -507,8 +507,8 @@ tbody tr.is-early:hover { background: #FFF3E0; }
   transition: all 0.15s;
   white-space: nowrap;
 }
-.early-toggle:hover  { background: #FEE8CC; }
-.early-toggle.active { background: #C2410C; color: #fff; border-color: #C2410C; }
+.early-toggle:hover  { background: rgba(212,166,85,0.4); }
+.early-toggle.active { background: var(--amber); color: #fff; border-color: var(--amber); }
 .empty-state {
   text-align: center;
   padding: 60px 20px;
